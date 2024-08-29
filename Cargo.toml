@@ -2,6 +2,7 @@
 name = "appimage_updater"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
 [dependencies]
 rayon = "1.5"

@@ -13,10 +13,22 @@ struct Args {
     /// Number of threads to use
     #[arg(short, long, default_value_t = 4)]
     j: usize,
+    /// Show version information
+    #[arg(short, long)]
+    version: bool,
 }
+
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+const COMMIT: &str = env!("GIT_COMMIT_HASH");
 
 fn main() {
     let args = Args::parse();
+
+    // Show version information and exit
+    if args.version {
+        println!("Version: {}\nCommit: {}", VERSION.white(), COMMIT.white());
+        std::process::exit(0);
+    }
 
     // Check if the number of threads is within the allowed range
     if args.j < 1 || args.j > 8 {
