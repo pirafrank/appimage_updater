@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v2
+
+      - name: Extract toolchain channel
+        id: extract_toolchain
+        run: |
+          TOOLCHAIN_CHANNEL=$(grep 'channel' rust-toolchain.toml | cut -d '"' -f 2)
+          echo "Toolchain channel: $TOOLCHAIN_CHANNEL"
+          echo "TOOLCHAIN_CHANNEL=$TOOLCHAIN_CHANNEL" >> $GITHUB_OUTPUT
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ steps.extract_toolchain.outputs.TOOLCHAIN_CHANNEL }}
+
+      - name: Setup cross toolchain
+        run: cargo install cross
+
+      - name: Setup just runner
+        uses: extractions/setup-just@v2
+
+      - name: Build project
+        run: just build_all
