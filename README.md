@@ -1,14 +1,26 @@
 # AppImage Updater
 
- A CLI tool to look for AppImages in your $PATH and call appimageupdatetool to update them
+[![CI](https://github.com/pirafrank/appimage_updater/actions/workflows/ci.yml/badge.svg)](https://github.com/pirafrank/appimage_updater/actions/workflows/ci.yml)
 
-## Installation
+A CLI tool to look for AppImages in your $PATH and call appimageupdatetool to update them
 
-1. Build the binary (read below)
+ ![GIF Image with demo of the tool](./assets/appimageupdater.gif)
 
-2. Move it to a dir in `$PATH`
+## Install
 
-## Build it
+Download, build, and install to `$HOME/.cargo/bin` in one command:
+
+```sh
+cargo install --locked --git https://github.com/pirafrank/appimage_updater
+```
+
+Alternatively, you can build the binary and move it to `$PATH` by yourself.
+
+## Update
+
+Re-run the `cargo install` command.
+
+## Build
 
 ```sh
 git clone https://github.com/pirafrank/appimage_updater.git
@@ -17,6 +29,19 @@ make release
 # add to path, e.g.:
 # cp ./target/release/appimage_updater ~/.local/bin/
 ```
+
+## Run
+
+```sh
+# 4 threads by default
+appimage_updater
+```
+
+```sh
+# 2 threads
+appimage_updater -j 2
+```
+
 
 ## Cross-compilation
 
