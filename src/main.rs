@@ -3,7 +3,9 @@ use clap::Parser;
 use rayon::prelude::*;
 use std::env;
 use std::fs;
-use std::process::Command;
+use std::process::{Command, Stdio};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 
 #[derive(Parser)]
 struct Args {
@@ -43,17 +45,27 @@ fn main() {
     }
 
     // Run appimageupdatetool in parallel
+    let counter = Arc::new(AtomicUsize::new(1));
     rayon::ThreadPoolBuilder::new()
         .num_threads(args.j)
         .build_global()
         .unwrap();
 
     appimages.par_iter().for_each(|appimage| {
-        println!("\n\nUpdating {:?}", appimage);
-        Command::new("appimageupdatetool")
+        let thread_num = counter.fetch_add(1, Ordering::SeqCst);
+        println!("\n\nUpdating {:?} on thread {}", appimage, thread_num);
+        let output = Command::new("appimageupdatetool")
             .arg("-O")
             .arg(appimage)
-            .status()
-            .expect("Failed to execute appimageupdatetool");
+            .stdout(Stdio::piped())
+            .spawn()
+            .expect("Failed to execute appimageupdatetool")
+            .wait_with_output()
+            .expect("Failed to wait on child");
+
+        let output_str = String::from_utf8_lossy(&output.stdout);
+        for line in output_str.lines() {
+            println!("[Thread {}] {}", thread_num, line);
+        }
     });
 }
