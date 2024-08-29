@@ -4,3 +4,9 @@
 [toolchain]
 channel = "stable"
 
+# Run `rustup target add <target>` to install a target platform
+[target]
+targets = [
+    "x86_64-unknown-linux-gnu",
+    "aarch64-unknown-linux-gnu"
+]

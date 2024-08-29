@@ -17,3 +17,25 @@ make release
 # add to path, e.g.:
 # cp ./target/release/appimage_updater ~/.local/bin/
 ```
+
+## Cross-compilation
+
+1. Add target to rustup:
+
+```sh
+rustup target add aarch64-unknown-linux-gnu
+```
+
+2. then cross-compile via `cargo`:
+
+```sh
+sudo apt-get install gcc-aarch64-linux-gnu
+cargo build --release --target aarch64-unknown-linux-gnu
+```
+
+or via `cross`:
+
+```sh
+cargo install cross
+just release_all
+```
