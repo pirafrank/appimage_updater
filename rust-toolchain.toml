@@ -1,0 +1,6 @@
+# Rust Toolchain File
+
+# Version of Rust to use
+[toolchain]
+channel = "stable"
+
