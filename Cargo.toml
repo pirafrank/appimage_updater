@@ -8,3 +8,6 @@ build = "build.rs"
 rayon = "1.5"
 clap = { version = "4.0", features = ["derive"] }
 colored = "2.0"
+
+[build-dependencies]
+chrono = "0.4.38"

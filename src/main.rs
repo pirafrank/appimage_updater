@@ -10,9 +10,12 @@ use std::sync::Arc;
 
 #[derive(Parser)]
 struct Args {
-    /// Number of threads to use
+    /// Number of threads to use (1-8)
     #[arg(short, long, default_value_t = 4)]
     j: usize,
+    /// Run appimageupdatetool to only check for updates
+    #[arg(short, long, default_value_t = false)]
+    dry_run: bool,
     /// Show version information
     #[arg(short, long)]
     version: bool,
@@ -20,13 +23,16 @@ struct Args {
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const COMMIT: &str = env!("GIT_COMMIT_HASH");
+const BUILD_DATE: &str = env!("BUILD_DATE");
+
+const APPIMAGEUPDATETOOL: &str = "appimageupdatetool";
 
 fn main() {
     let args = Args::parse();
 
     // Show version information and exit
     if args.version {
-        println!("Version: {}\nCommit: {}", VERSION.white(), COMMIT.white());
+        println!("Version: {}\nCommit: {}\nBuild Date: {}", VERSION.white(), COMMIT.white(), BUILD_DATE.white());
         std::process::exit(0);
     }
 
@@ -37,9 +43,18 @@ fn main() {
     }
 
     // Check if appimageupdatetool is installed
-    if Command::new("appimageupdatetool").output().is_err() {
-        eprintln!("{}", "Error: appimageupdatetool not found. Install it and try again. Aborting.".red());
+    if Command::new(APPIMAGEUPDATETOOL).output().is_err() {
+        eprintln!("{}", format!("Error: {} not found. Install it and try again. Aborting.", APPIMAGEUPDATETOOL).red());
         std::process::exit(1);
+    }
+
+    // if dry-run mode is enabled, use the -j as argument for appimageupdatetool instead of -O.
+    let apparg = if args.dry_run { "-j" } else { "-O" };
+    if args.dry_run {
+        eprintln!("{}", format!(
+          "\n** Dry-run mode enabled. {} will check for updates but won't apply them. **\n",
+          APPIMAGEUPDATETOOL
+        ).yellow());
     }
 
     // Get all directories in $PATH
@@ -86,13 +101,13 @@ fn main() {
         let thread_num = counter.fetch_add(1, Ordering::SeqCst);
         let color = colors[(thread_num - 1) % colors.len()];
         println!("{}", format!("[Thread {}] Updating {:?}", thread_num, appimage).color(color));
-        let output = Command::new("appimageupdatetool")
-            .arg("-O")
+        let output = Command::new(APPIMAGEUPDATETOOL)
+            .arg(apparg)
             .arg(appimage)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
-            .expect("Failed to execute appimageupdatetool")
+            .expect(&format!("Failed to execute {}", APPIMAGEUPDATETOOL))
             .wait_with_output()
             .expect("Failed to wait on child");
 
@@ -109,6 +124,17 @@ fn main() {
 
         if !output.status.success() {
             eprintln!("{}", format!("[Thread {}] Error: Failed to update {:?}", thread_num, appimage).red());
+            if let Some(code) = output.status.code() {
+                // check if the exit code is 2 as per the appimageupdatetool source code:
+                // - describe function:
+                //   https://github.com/AppImageCommunity/AppImageUpdate/blob/5e91de84aba775ba8d3a4771e4f7f06056f9b764/src/cli/main.cpp#L154
+                // - update function:
+                //   https://github.com/AppImageCommunity/AppImageUpdate/blob/5e91de84aba775ba8d3a4771e4f7f06056f9b764/src/cli/main.cpp#L177
+                if code == 2 {
+                    eprintln!("{}", format!("[Thread {}] This is likely an AppImage issue. \
+                    For more info, try running: {} -d {:?}", thread_num, APPIMAGEUPDATETOOL, appimage).red());
+                }
+            }
         }
     });
 }

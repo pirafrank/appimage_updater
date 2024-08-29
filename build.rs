@@ -1,4 +1,5 @@
 use std::process::Command;
+use chrono::Utc;
 
 fn main() {
     // Get the short commit hash
@@ -9,6 +10,11 @@ fn main() {
 
     let git_hash = String::from_utf8(output.stdout).expect("Invalid UTF-8 sequence");
 
-    // Set the environment variable
+    // today date
+    let now = Utc::now();
+    let build_date = now.format("%Y-%m-%d").to_string();
+
+    // Set the environment variables
     println!("cargo:rustc-env=GIT_COMMIT_HASH={}", git_hash.trim());
+    println!("cargo:rustc-env=BUILD_DATE={}", build_date);
 }
