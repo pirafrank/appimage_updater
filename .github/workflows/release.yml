@@ -1,0 +1,99 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+      - 'v*.*.*'
+      - '*.*.*-*'
+      - 'v*.*.*-*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Get app name
+        id: name
+        run: |
+          APP_NAME=$(grep -m1 -oP '(?<=name = ")[^"]*' Cargo.toml)
+          echo "APP_NAME=$APP_NAME"
+          echo "name=$APP_NAME" >> $GITHUB_OUTPUT
+
+      - name: Get app version
+        id: version
+        run: |
+          APP_VERSION=$(grep -m1 -oP '(?<=version = ")[^"]*' Cargo.toml)
+          echo "APP_VERSION=$APP_VERSION"
+          echo "version=$APP_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Match version check
+        id: match_version_check
+        run: |
+          APP_VERSION="${{ steps.version.outputs.version }}"
+          TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          if [[ $TAG == v* ]]; then
+            TAG=${TAG:1}
+          fi
+          echo "Extracted tag for comparison: $TAG"
+          if [[ $APP_VERSION != $TAG ]]; then
+            echo "ERROR: version in Cargo.toml ($APP_VERSION) does not match the pushed tag ($TAG)"
+            exit 1
+          fi
+
+      - name: Is pre-release
+        id: release
+        run: |
+          APP_VERSION="${{ steps.version.outputs.version }}"
+          if [[ $APP_VERSION == *-* ]]; then
+            PRE_RELEASE=true
+          else
+            PRE_RELEASE=false
+          fi
+          echo "PRE_RELEASE=$PRE_RELEASE"
+          echo "pre=$PRE_RELEASE" >> $GITHUB_OUTPUT
+
+      - name: Extract toolchain channel
+        id: extract_toolchain
+        run: |
+          TOOLCHAIN_CHANNEL=$(grep 'channel' rust-toolchain.toml | cut -d '"' -f 2)
+          echo "Toolchain channel: $TOOLCHAIN_CHANNEL"
+          echo "TOOLCHAIN_CHANNEL=$TOOLCHAIN_CHANNEL" >> $GITHUB_OUTPUT
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ steps.extract_toolchain.outputs.TOOLCHAIN_CHANNEL }}
+
+      - name: Setup cross toolchain
+        run: cargo install cross
+
+      - name: Setup just runner
+        uses: extractions/setup-just@v2
+
+      - name: Build release
+        run: just release_all
+
+      - name: Pack release
+        run: just pack
+
+      - name: Create release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./release/${{ steps.name.outputs.name }}-${{ steps.version.outputs.version }}-aarch64-linux-gnu.tar.gz
+            ./release/${{ steps.name.outputs.name }}-${{ steps.version.outputs.version }}-aarch64-linux-gnu.tar.gz.sha256
+            ./release/${{ steps.name.outputs.name }}-${{ steps.version.outputs.version }}-x86_64-linux-gnu.tar.gz
+            ./release/${{ steps.name.outputs.name }}-${{ steps.version.outputs.version }}-x86_64-linux-gnu.tar.gz.sha256
+          name: v${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ steps.release.outputs.pre }}
+          # Note: drafts and prereleases cannot be set as latest.
+          make_latest: ${{ steps.release.outputs.pre == 'false' }}
+          fail_on_unmatched_files: true
+          # no need to specify GITHUB_TOKEN here, it is automatically provided by GitHub Actions
+          # https://github.com/softprops/action-gh-release#-customizing
+          # https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication

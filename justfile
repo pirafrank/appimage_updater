@@ -21,6 +21,10 @@ release_all:
     cross build --release --target x86_64-unknown-linux-gnu
     cross build --release --target aarch64-unknown-linux-gnu
 
+# Task to pack the project for GitHub release
+pack:
+    ./pack.sh
+
 # Task to run the project with the specified number of threads
 run j=default_threads:
     cargo run -- -j {{j}}

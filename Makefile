@@ -14,12 +14,16 @@ build_all:
 
 # Target to build the project in release mode
 release:
-	cargo build --release
+		cargo build --release
 
 # Task to build the project in release mode for all targets
 release_all:
     cross build --release --target x86_64-unknown-linux-gnu
     cross build --release --target aarch64-unknown-linux-gnu
+
+# Task to pack the project for GitHub release
+pack:
+    ./pack.sh
 
 # Target to run the project with the specified number of threads
 run:
