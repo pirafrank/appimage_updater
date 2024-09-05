@@ -1,6 +1,7 @@
 [package]
 name = "appimage_updater"
 version = "0.1.0"
+authors = [ "Francesco Pira (@pirafrank)" ]
 edition = "2021"
 build = "build.rs"
 
