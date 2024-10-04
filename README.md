@@ -1,26 +1,50 @@
 # AppImage Updater
 
+[![GitHub Release](https://img.shields.io/github/v/release/pirafrank/appimage_updater)](https://github.com/pirafrank/appimage_updater/releases/latest)
+[![Crates.io](https://img.shields.io/crates/v/appimage_updater)](https://crates.io/crates/appimage_updater)
+[![Crates.io MSRV](https://img.shields.io/crates/msrv/appimage_updater)](https://github.com/pirafrank/appimage_updater/blob/main/Cargo.toml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 [![CI](https://github.com/pirafrank/appimage_updater/actions/workflows/ci.yml/badge.svg)](https://github.com/pirafrank/appimage_updater/actions/workflows/ci.yml)
+[![Release](https://github.com/pirafrank/appimage_updater/actions/workflows/release.yml/badge.svg)](https://github.com/pirafrank/appimage_updater/actions/workflows/release.yml)
 
-A CLI tool to look for AppImages in your $PATH and call appimageupdatetool to update them
+A CLI tool to look for AppImages in your $PATH and call appimageupdatetool to update them.
 
- ![GIF Image with demo of the tool](./assets/appimageupdater.gif)
+![GIF Image with demo of the tool](./assets/appimageupdater.gif)
 
 ## Install
 
-Build, and install to `$HOME/.cargo/bin` in one command via `cargo`:
+### Binary
+
+Download the binary from [latest release](https://github.com/pirafrank/appimage_updater/releases/latest) and move to `PATH`.
+
+### cargo
+
+```sh
+cargo install appimage_updater
+```
+
+### binstall
+
+If you have [binstall](https://github.com/cargo-bins/cargo-binstall), you can get the binary and skip compilation.
+
+```sh
+cargo binstall appimage_updater
+```
+
+### From source
+
+Build and install to `$HOME/.cargo/bin` compiling from source:
 
 ```sh
 cargo install --locked --git https://github.com/pirafrank/appimage_updater
 ```
 
-Or download binary from the [latest release](https://github.com/pirafrank/appimage_updater/releases/latest).
-
 ## Update
 
 Download the new binary version and overwrite old one.
 
-Or, if installed via `cargo`, re-run the `cargo install` command.
+If you have installed via `cargo`, then re-run the `cargo install` command.
 
 ## Build
 
