@@ -1,6 +1,7 @@
 # AppImage Updater
 
 [![CI](https://github.com/pirafrank/appimage_updater/actions/workflows/ci.yml/badge.svg)](https://github.com/pirafrank/appimage_updater/actions/workflows/ci.yml)
+[![Release](https://github.com/pirafrank/appimage_updater/actions/workflows/release.yml/badge.svg)](https://github.com/pirafrank/appimage_updater/actions/workflows/release.yml)
 
 A CLI tool to look for AppImages in your $PATH and call appimageupdatetool to update them
 

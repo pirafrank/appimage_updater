@@ -3,7 +3,7 @@
 # Default number of threads
 default_threads := "4"
 
-# Task to uild the project
+# Task to build the project
 build:
     cargo build
 
