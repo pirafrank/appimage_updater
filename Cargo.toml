@@ -10,6 +10,8 @@ readme = "README.md"
 edition = "2021"
 rust-version = "1.79.0"
 build = "build.rs"
+keywords = ["appimage", "updater", "cli"]
+exclude = ["/.vscode/*", "/.github/*"]
 
 [dependencies]
 rayon = "1.5"
