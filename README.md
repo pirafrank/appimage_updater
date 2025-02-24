@@ -37,14 +37,16 @@ cargo binstall appimage_updater
 Build and install to `$HOME/.cargo/bin` compiling from source:
 
 ```sh
-cargo install --locked --git https://github.com/pirafrank/appimage_updater
+cargo install --locked --git https://github.com/pirafrank/rust_exif_renamer --tag VERSION
 ```
+
+Note: Replace `VERSION` with the desired version to install. Not specifying a tag will install from `main` branch. `main` branch should be stable, but it's unreleased software and may contain bugs or breaking changes. It should considered beta quality software.
 
 ## Update
 
 Download the new binary version and overwrite old one.
 
-If you have installed via `cargo`, then re-run the `cargo install` command.
+If you have installed via `cargo`, then re-run the `cargo install` command specifying the new tag.
 
 ## Build
 
